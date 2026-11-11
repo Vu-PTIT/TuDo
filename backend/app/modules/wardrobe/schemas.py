@@ -27,6 +27,8 @@ class CreateWardrobeItemRequest(BaseModel):
     source: ItemSource = "photo"
     asset_id: UUID | None = None
     image_variant: ImageVariant | None = None
+    back_asset_id: UUID | None = None
+    back_image_variant: ImageVariant | None = None
     colors: list[str] = Field(default_factory=list, max_length=10)
     size: str | None = Field(default=None, max_length=50)
     brand: str | None = Field(default=None, max_length=100)
@@ -49,6 +51,16 @@ class CreateWardrobeItemRequest(BaseModel):
             raise ValueError(
                 "Món đồ tạo từ ảnh (source='photo') bắt buộc có asset_id và image_variant."
             )
+        if self.source == "placeholder" and (
+            self.back_asset_id is not None or self.back_image_variant is not None
+        ):
+            raise ValueError(
+                "Món đồ dạng thẻ tạm (source='placeholder') không được gắn ảnh mặt sau."
+            )
+        if (self.back_asset_id is None) != (self.back_image_variant is None):
+            raise ValueError(
+                "Ảnh mặt sau (back_asset_id) và phiên bản ảnh mặt sau (back_image_variant) phải được cung cấp cùng nhau."
+            )
         return self
 
 
@@ -58,6 +70,9 @@ class UpdateWardrobeItemRequest(BaseModel):
     source: ItemSource | None = None
     asset_id: UUID | None = None
     image_variant: ImageVariant | None = None
+    back_asset_id: UUID | None = None
+    back_image_variant: ImageVariant | None = None
+    clear_back_image: bool = False
     colors: list[str] | None = Field(default=None, max_length=10)
     size: str | None = Field(default=None, max_length=50)
     brand: str | None = Field(default=None, max_length=100)
@@ -85,6 +100,9 @@ class WardrobeItemResponse(BaseModel):
     source: ItemSource
     asset_id: UUID | None = None
     image_variant: ImageVariant | None = None
+    back_asset_id: UUID | None = None
+    back_image_variant: ImageVariant | None = None
+    has_back_image: bool = False
     colors: list[str]
     size: str | None = None
     brand: str | None = None

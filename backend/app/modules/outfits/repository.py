@@ -35,6 +35,15 @@ class OutfitsRepository:
                     message=f"Món đồ '{wi['name']}' đã xóa hoặc đang lưu trữ, không thể thêm vào outfit.",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            display_side = item_entry.get("display_side", "front")
+            if display_side == "back" and (
+                wi.get("back_asset_id") is None or wi.get("back_image_variant") is None
+            ):
+                raise AppError(
+                    code="INVALID_REQUEST",
+                    message=f"Món đồ '{wi['name']}' chưa có ảnh mặt sau nên không thể chọn hiển thị mặt sau trên bàn phối.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
 
     def create_outfit(
         self,
@@ -80,6 +89,7 @@ class OutfitsRepository:
                     "w": entry["w"],
                     "h": entry["h"],
                     "z_index": entry["z_index"],
+                    "display_side": entry.get("display_side", "front"),
                 }
                 for entry in items
             ]
@@ -156,6 +166,7 @@ class OutfitsRepository:
                         "w": entry["w"],
                         "h": entry["h"],
                         "z_index": entry["z_index"],
+                        "display_side": entry.get("display_side", "front"),
                     }
                     for entry in updates["items"]
                 ]

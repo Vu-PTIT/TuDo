@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+GarmentSide = Literal["front", "back"]
+
 
 class OutfitCanvasItemInput(BaseModel):
     item_id: UUID
@@ -12,6 +14,7 @@ class OutfitCanvasItemInput(BaseModel):
     w: float = Field(..., gt=0.0, le=1.0)
     h: float = Field(..., gt=0.0, le=1.0)
     z_index: int = Field(default=0, ge=0)
+    display_side: GarmentSide = "front"
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "OutfitCanvasItemInput":
@@ -85,11 +88,14 @@ class OutfitItemDetailResponse(BaseModel):
     w: float
     h: float
     z_index: int
+    display_side: GarmentSide = "front"
     item_name: str | None = None
     category: str | None = None
     source: str | None = None
     asset_id: UUID | None = None
     image_variant: str | None = None
+    back_asset_id: UUID | None = None
+    back_image_variant: str | None = None
     availability: str | None = None
     item_state: Literal["ready", "laundry", "unavailable", "archived", "deleted"] = "ready"
 

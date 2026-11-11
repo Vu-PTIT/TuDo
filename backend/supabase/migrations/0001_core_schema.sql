@@ -83,6 +83,9 @@ CREATE TABLE IF NOT EXISTS public.wardrobe_items (
     asset_id uuid NULL,
     image_variant text NULL
         CONSTRAINT wardrobe_items_variant_check CHECK (image_variant IS NULL OR image_variant IN ('original', 'cutout')),
+    back_asset_id uuid NULL,
+    back_image_variant text NULL
+        CONSTRAINT wardrobe_items_back_variant_check CHECK (back_image_variant IS NULL OR back_image_variant IN ('original', 'cutout')),
     availability text NOT NULL DEFAULT 'available'
         CONSTRAINT wardrobe_items_availability_check CHECK (
             availability IN ('available', 'laundry', 'unavailable', 'archived')
@@ -92,9 +95,16 @@ CREATE TABLE IF NOT EXISTS public.wardrobe_items (
     updated_at timestamptz NOT NULL DEFAULT timezone('utc', now()),
     UNIQUE (id, owner_id),
     CONSTRAINT wardrobe_items_source_asset_check CHECK (
-        (source = 'placeholder') OR (source = 'photo' AND asset_id IS NOT NULL AND image_variant IS NOT NULL)
+        (source = 'placeholder' AND back_asset_id IS NULL AND back_image_variant IS NULL)
+        OR (source = 'photo' AND asset_id IS NOT NULL AND image_variant IS NOT NULL)
+    ),
+    CONSTRAINT wardrobe_items_back_asset_pair_check CHECK (
+        (back_asset_id IS NULL AND back_image_variant IS NULL)
+        OR (source = 'photo' AND back_asset_id IS NOT NULL AND back_image_variant IS NOT NULL)
     ),
     CONSTRAINT wardrobe_items_asset_owner_fk FOREIGN KEY (asset_id, owner_id)
+        REFERENCES public.media_assets(id, owner_id) ON DELETE RESTRICT,
+    CONSTRAINT wardrobe_items_back_asset_owner_fk FOREIGN KEY (back_asset_id, owner_id)
         REFERENCES public.media_assets(id, owner_id) ON DELETE RESTRICT
 );
 
@@ -140,6 +150,8 @@ CREATE TABLE IF NOT EXISTS public.outfit_items (
     w double precision NOT NULL,
     h double precision NOT NULL,
     z_index integer NOT NULL DEFAULT 0,
+    display_side text NOT NULL DEFAULT 'front'
+        CONSTRAINT outfit_items_display_side_check CHECK (display_side IN ('front', 'back')),
     UNIQUE (outfit_id, item_id),
     CONSTRAINT outfit_items_geometry_check CHECK (
         w > 0 AND h > 0 AND x >= 0 AND y >= 0 AND (x + w) <= 1.000001 AND (y + h) <= 1.000001 AND z_index >= 0

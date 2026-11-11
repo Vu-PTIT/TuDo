@@ -383,15 +383,17 @@ BEGIN
         RAISE EXCEPTION 'VALIDATION_ERROR: Outfit must contain between 1 and 12 items' USING ERRCODE = '22023';
     END IF;
 
-    -- Verify all items belong to owner and are not deleted/archived
+    -- Verify all items belong to owner, are not deleted/archived, and if display_side='back' then back_asset_id exists
     SELECT COUNT(*) INTO v_invalid_count
-    FROM jsonb_to_recordset(p_items) AS x(item_id uuid)
+    FROM jsonb_to_recordset(p_items) AS x(item_id uuid, display_side text)
     LEFT JOIN public.wardrobe_items wi
         ON wi.id = x.item_id AND wi.owner_id = v_uid AND wi.deleted_at IS NULL AND wi.availability <> 'archived'
-    WHERE wi.id IS NULL;
+    WHERE wi.id IS NULL
+       OR COALESCE(x.display_side, 'front') NOT IN ('front', 'back')
+       OR (x.display_side = 'back' AND wi.back_asset_id IS NULL);
 
     IF v_invalid_count > 0 THEN
-        RAISE EXCEPTION 'VALIDATION_ERROR: One or more items do not exist, are deleted, or are archived' USING ERRCODE = '22023';
+        RAISE EXCEPTION 'VALIDATION_ERROR: One or more items do not exist, are deleted/archived, or request back side without a back image' USING ERRCODE = '22023';
     END IF;
 
     IF p_outfit_id IS NULL THEN
@@ -424,7 +426,7 @@ BEGIN
         DELETE FROM public.outfit_items WHERE outfit_id = p_outfit_id AND owner_id = v_uid;
     END IF;
 
-    INSERT INTO public.outfit_items (outfit_id, item_id, owner_id, x, y, w, h, z_index)
+    INSERT INTO public.outfit_items (outfit_id, item_id, owner_id, x, y, w, h, z_index, display_side)
     SELECT
         v_outfit.id,
         x.item_id,
@@ -433,14 +435,16 @@ BEGIN
         x.y,
         x.w,
         x.h,
-        x.z_index
+        x.z_index,
+        COALESCE(x.display_side, 'front')
     FROM jsonb_to_recordset(p_items) AS x(
         item_id uuid,
         x double precision,
         y double precision,
         w double precision,
         h double precision,
-        z_index integer
+        z_index integer,
+        display_side text
     );
 
     RETURN to_jsonb(v_outfit);

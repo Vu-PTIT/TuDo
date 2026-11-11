@@ -20,12 +20,16 @@ def cleanup_abandoned_and_unreferenced_media(
         for item in target_store.wardrobe_items.values():
             if item.get("asset_id"):
                 referenced_assets.add(item["asset_id"])
+            if item.get("back_asset_id"):
+                referenced_assets.add(item["back_asset_id"])
 
         for entry in target_store.planner_entries.values():
             snap = entry.get("outfit_snapshot", {})
             for s_item in snap.get("items", []):
                 if s_item.get("asset_id"):
                     referenced_assets.add(UUID(str(s_item["asset_id"])))
+                if s_item.get("back_asset_id"):
+                    referenced_assets.add(UUID(str(s_item["back_asset_id"])))
 
         # 2. Clean expired upload_pending assets
         for asset_id, asset in list(target_store.media_assets.items()):

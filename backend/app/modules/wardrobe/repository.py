@@ -51,6 +51,10 @@ class WardrobeRepository:
                 self._verify_asset_ready_for_owner(
                     owner_id, data["asset_id"], data["image_variant"]
                 )
+                if data.get("back_asset_id") is not None:
+                    self._verify_asset_ready_for_owner(
+                        owner_id, data["back_asset_id"], data["back_image_variant"]
+                    )
 
             now = utc_now()
             item_id = uuid4()
@@ -60,8 +64,10 @@ class WardrobeRepository:
                 "name": data["name"],
                 "category": data["category"],
                 "source": data["source"],
-                "asset_id": data.get("asset_id"),
-                "image_variant": data.get("image_variant"),
+                "asset_id": data.get("asset_id") if data["source"] == "photo" else None,
+                "image_variant": data.get("image_variant") if data["source"] == "photo" else None,
+                "back_asset_id": data.get("back_asset_id") if data["source"] == "photo" else None,
+                "back_image_variant": data.get("back_image_variant") if data["source"] == "photo" else None,
                 "colors": list(data.get("colors") or []),
                 "size": data.get("size"),
                 "brand": data.get("brand"),
@@ -146,6 +152,21 @@ class WardrobeRepository:
             new_asset_id = updates.get("asset_id", row["asset_id"])
             new_variant = updates.get("image_variant", row["image_variant"])
 
+            if updates.get("clear_back_image") or new_source == "placeholder":
+                new_back_asset_id = None
+                new_back_variant = None
+            else:
+                new_back_asset_id = (
+                    updates["back_asset_id"]
+                    if "back_asset_id" in updates and updates["back_asset_id"] is not None
+                    else row.get("back_asset_id")
+                )
+                new_back_variant = (
+                    updates["back_image_variant"]
+                    if "back_image_variant" in updates and updates["back_image_variant"] is not None
+                    else row.get("back_image_variant")
+                )
+
             if new_source == "photo":
                 if new_asset_id is None or new_variant is None:
                     raise AppError(
@@ -154,6 +175,27 @@ class WardrobeRepository:
                         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     )
                 self._verify_asset_ready_for_owner(owner_id, new_asset_id, new_variant)
+
+                if (new_back_asset_id is None) != (new_back_variant is None):
+                    raise AppError(
+                        code="VALIDATION_ERROR",
+                        message="Ảnh mặt sau (back_asset_id) và phiên bản ảnh mặt sau (back_image_variant) phải đi kèm nhau.",
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    )
+                if new_back_asset_id is not None and new_back_variant is not None:
+                    self._verify_asset_ready_for_owner(
+                        owner_id, new_back_asset_id, new_back_variant
+                    )
+            else:
+                if (
+                    updates.get("back_asset_id") is not None
+                    or updates.get("back_image_variant") is not None
+                ):
+                    raise AppError(
+                        code="VALIDATION_ERROR",
+                        message="Món đồ dạng thẻ tạm không được gắn ảnh mặt sau.",
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    )
 
             for field_name in (
                 "name",
@@ -170,6 +212,15 @@ class WardrobeRepository:
             ):
                 if field_name in updates and updates[field_name] is not None:
                     row[field_name] = updates[field_name]
+
+            if new_source == "placeholder":
+                row["asset_id"] = None
+                row["image_variant"] = None
+                row["back_asset_id"] = None
+                row["back_image_variant"] = None
+            else:
+                row["back_asset_id"] = new_back_asset_id
+                row["back_image_variant"] = new_back_variant
 
             if updates.get("clear_purchase_price"):
                 row["purchase_price_vnd"] = None

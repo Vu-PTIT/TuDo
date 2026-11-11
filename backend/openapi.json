@@ -3565,6 +3565,33 @@
             ],
             "title": "Image Variant"
           },
+          "back_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Asset Id"
+          },
+          "back_image_variant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "original",
+                  "cutout"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Image Variant"
+          },
           "colors": {
             "items": {
               "type": "string"
@@ -4412,6 +4439,15 @@
             "minimum": 0.0,
             "title": "Z Index",
             "default": 0
+          },
+          "display_side": {
+            "type": "string",
+            "enum": [
+              "front",
+              "back"
+            ],
+            "title": "Display Side",
+            "default": "front"
           }
         },
         "type": "object",
@@ -4450,6 +4486,15 @@
           "z_index": {
             "type": "integer",
             "title": "Z Index"
+          },
+          "display_side": {
+            "type": "string",
+            "enum": [
+              "front",
+              "back"
+            ],
+            "title": "Display Side",
+            "default": "front"
           },
           "item_name": {
             "anyOf": [
@@ -4506,6 +4551,29 @@
               }
             ],
             "title": "Image Variant"
+          },
+          "back_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Asset Id"
+          },
+          "back_image_variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Image Variant"
           },
           "availability": {
             "anyOf": [
@@ -5110,6 +5178,50 @@
             ],
             "title": "Variant Metadata"
           },
+          "back_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Asset Id"
+          },
+          "back_image_variant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Image Variant"
+          },
+          "back_variant_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Variant Metadata"
+          },
+          "display_side": {
+            "type": "string",
+            "enum": [
+              "front",
+              "back"
+            ],
+            "title": "Display Side",
+            "default": "front"
+          },
           "x": {
             "type": "number",
             "title": "X"
@@ -5612,6 +5724,38 @@
             ],
             "title": "Image Variant"
           },
+          "back_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Asset Id"
+          },
+          "back_image_variant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "original",
+                  "cutout"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Image Variant"
+          },
+          "clear_back_image": {
+            "type": "boolean",
+            "title": "Clear Back Image",
+            "default": false
+          },
           "colors": {
             "anyOf": [
               {
@@ -5924,6 +6068,38 @@
               }
             ],
             "title": "Image Variant"
+          },
+          "back_asset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Asset Id"
+          },
+          "back_image_variant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "original",
+                  "cutout"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Back Image Variant"
+          },
+          "has_back_image": {
+            "type": "boolean",
+            "title": "Has Back Image",
+            "default": false
           },
           "colors": {
             "items": {

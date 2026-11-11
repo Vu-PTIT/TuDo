@@ -63,6 +63,16 @@ class PlannerRepository:
                         asset.get("variant_metadata", {}).get(variant_key)
                     )
 
+            back_variant_meta = None
+            back_asset_id = wi.get("back_asset_id")
+            back_variant_key = wi.get("back_image_variant")
+            if back_asset_id and back_variant_key:
+                back_asset = self._store.media_assets.get(back_asset_id)
+                if back_asset and back_asset["owner_id"] == owner_id:
+                    back_variant_meta = deepcopy(
+                        back_asset.get("variant_metadata", {}).get(back_variant_key)
+                    )
+
             snapshot_items.append(
                 {
                     "item_id": wi["id"],
@@ -72,6 +82,10 @@ class PlannerRepository:
                     "asset_id": asset_id,
                     "image_variant": variant_key,
                     "variant_metadata": variant_meta,
+                    "back_asset_id": back_asset_id,
+                    "back_image_variant": back_variant_key,
+                    "back_variant_metadata": back_variant_meta,
+                    "display_side": ci.get("display_side", "front"),
                     "x": ci["x"],
                     "y": ci["y"],
                     "w": ci["w"],

@@ -34,6 +34,8 @@ class WardrobeService:
         raw_cpw, display_cpw, cpw_status = compute_cpw_metrics(
             row.get("purchase_price_vnd"), wear_days
         )
+        back_asset_id = row.get("back_asset_id")
+        back_image_variant = row.get("back_image_variant")
         return WardrobeItemResponse(
             id=row["id"],
             name=row["name"],
@@ -41,6 +43,9 @@ class WardrobeService:
             source=row["source"],
             asset_id=row.get("asset_id"),
             image_variant=row.get("image_variant"),
+            back_asset_id=back_asset_id,
+            back_image_variant=back_image_variant,
+            has_back_image=bool(back_asset_id and back_image_variant),
             colors=row.get("colors", []),
             size=row.get("size"),
             brand=row.get("brand"),

@@ -13,6 +13,10 @@ class SnapshotItemSchema(BaseModel):
     asset_id: UUID | None = None
     image_variant: str | None = None
     variant_metadata: dict[str, Any] | None = None
+    back_asset_id: UUID | None = None
+    back_image_variant: str | None = None
+    back_variant_metadata: dict[str, Any] | None = None
+    display_side: Literal["front", "back"] = "front"
     x: float
     y: float
     w: float
