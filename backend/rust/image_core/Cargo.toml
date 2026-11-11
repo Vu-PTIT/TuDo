@@ -1,0 +1,20 @@
+[package]
+name = "closet_loop_image_core"
+version = "0.1.0"
+edition = "2021"
+description = "Native image validation, orientation normalization, metadata stripping, and thumbnail generation for Closet Loop"
+
+[lib]
+name = "closet_loop_image_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+pyo3 = { version = "0.24", features = ["abi3-py311"], optional = true }
+thiserror = "2.0"
+
+[features]
+default = ["python"]
+python = ["dep:pyo3"]
+extension-module = ["python", "pyo3/extension-module"]
+

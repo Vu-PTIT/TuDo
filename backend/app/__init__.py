@@ -1,0 +1,2 @@
+"""Closet Loop Backend Application."""
+
